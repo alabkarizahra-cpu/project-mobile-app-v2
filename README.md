@@ -2,9 +2,13 @@
 
 ## CSC 402 — Mobile Application Programming
 
+
+
 LocalLens is a mobile application designed to help users discover Saudi Arabia through personalized local experiences and social exploration.
 
-The application allows users to explore local and cultural experiences based on their interests, such as heritag
+The application allows users to explore local and cultural experiences based on their interests, such as heritage, food, nature, arts, and crafts. Users can build personalized day plans based on their interests and available time, connect with people who share similar interests, join or create group trips, share their experiences, and keep a personal travel journal
+
+
 
 
 
