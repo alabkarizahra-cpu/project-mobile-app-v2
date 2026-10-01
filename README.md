@@ -1,21 +1,28 @@
-# Smart Saving Assistant
+# LocalLens – Discover Saudi Arabia 🇸🇦
 
 ## CSC 402 — Mobile Application Programming
 
-Smart Saving Assistant is a mobile application designed to help users manage their personal expenses, understand their spending habits, and develop better saving habits.
+LocalLens is a mobile application designed to help users discover Saudi Arabia through personalized local experiences and social exploration.
 
-The application allows users to record and categorize expenses, analyze spending patterns, estimate potential future expenses, detect unusual spending, manage subscriptions, and create saving goals.
+The application allows users to explore local and cultural experiences based on their interests, such as heritag
+
+
 
 ## Project Features
 
-- Expense Recording & Categorization
-- Spending Analysis & Visualization
-- Future Expense Estimation
-- Unusual Spending Detection
-- Subscription Management
-- Saving Goals
-- Personalized Saving Recommendations
-- Potential Savings Impact
+- Build My Day – Interactive Itinerary Planner
+
+- Experience Discovery & Interactive Map
+
+- Community & Interest Groups
+
+- Group Trip Coordination
+
+- Experience Sharing, Check-in & Reviews
+
+- Travel Journal
+
+- Local Experience Management
 
 ## Team Members
 
