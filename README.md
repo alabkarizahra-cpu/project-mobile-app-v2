@@ -38,6 +38,26 @@ The application allows users to explore local and cultural experiences based on 
 | Nawal Aldossary | 2240006556 |
 | Zainab Alhabib | 2240004289 |
 
+## Milestone 2 – UI/UX Design & System Architecture
+
+### UI/UX Design
+
+The LocalLens user interface was designed using Figma and includes 16 high-fidelity screens covering the application's main features, including authentication, experience discovery, interactive maps, personalized itinerary planning, communities, group trips, and travel journals.
+
+**Figma Prototype:** [https://www.figma.com/proto/re2QmxGZRQFDqjuytozLEr/Untitled?node-id=48-2&p=f&t=ZoIOBQcxi2cMvtI5-1&scaling=scale-down&content-scaling=fixed&page-id=38%3A2 ]
+
+### System Architecture
+
+LocalLens follows a three-layer architecture:
+
+- **UI Layer:** Jetpack Compose, ViewModels, and Navigation Compose.
+- **Domain Layer:** Business logic, use cases, and repository interfaces.
+- **Data Layer:** Firebase repositories, Google Maps services, and location services.
+
+### Design Documentation
+
+All Milestone 2 design and architecture files are organized in the [docs folder](docs/), including UI screen designs, the navigation map, the style guide, system architecture documentation, and the AI Use Log.
+
 ## Project Structure
 
 
