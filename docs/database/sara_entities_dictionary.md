@@ -12,14 +12,14 @@
 | Entity | What it stores | Related to |
 |---|---|---|
 | User | User account and profile information | SavedPlace, Review, Itinerary, CommunityMember, TripParticipant, JournalEntry, UserInterest |
-| Experience | Tourist destinations and activities | SavedPlace, Review, ItineraryStop, JournalEntry |
+| Experience | Tourist destinations and activities, including geographic coordinates | SavedPlace, Review, ItineraryStop, JournalEntry |
 | SavedPlace | Experiences saved by users | User, Experience |
 | Review | User ratings and reviews of experiences | User, Experience |
-| Itinerary | Personalized daily travel plans | User, ItineraryStop |
+| Itinerary | Personalized daily travel plans, including duration, start time, and starting point | User, ItineraryStop |
 | ItineraryStop | Ordered stops within each itinerary | Itinerary, Experience |
 | Community | Groups of users with shared interests | CommunityMember, Trip |
 | CommunityMember | User memberships in communities | User, Community |
-| Trip | Group trips organized by communities | Community, TripParticipant |
+| Trip | Group trips organized by communities, including trip dates and meeting details | Community, TripParticipant |
 | TripParticipant | Users registered for group trips | User, Trip |
 | JournalEntry | Personal travel memories and notes | User, Experience |
 | UserInterest | Interests selected by users | User |
@@ -45,6 +45,8 @@
 | location | String | — | NOT NULL | Location of the experience |
 | category | String | — | NOT NULL | Experience category |
 | imageUrl | String | — | NULLABLE | Experience image URL |
+| latitude | Double | — | NOT NULL | Experience latitude coordinate |
+| longitude | Double | — | NOT NULL | Experience longitude coordinate |
 
 ### Table: SavedPlace
 
@@ -75,6 +77,9 @@
 | title | String | — | NOT NULL | Name of the travel plan |
 | date | String | — | NOT NULL | Planned travel date (YYYY-MM-DD) |
 | createdAt | Long | — | NOT NULL | Creation timestamp |
+| durationHours | Int | — | NOT NULL | Available trip duration in hours |
+| startTime | String | — | NOT NULL | Planned start time (HH:mm) |
+| startingPoint | String | — | NOT NULL | Selected starting location |
 
 ### Table: ItineraryStop
 
