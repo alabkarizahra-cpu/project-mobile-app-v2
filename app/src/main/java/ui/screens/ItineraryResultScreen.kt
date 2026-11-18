@@ -413,7 +413,7 @@ fun ItineraryResultScreen(
                         .weight(1f)
                         .heightIn(min = 52.dp),
                     shape = RoundedCornerShape(14.dp)
-                ) {
+               ) {
                     Text("Start route")
                 }
             }
