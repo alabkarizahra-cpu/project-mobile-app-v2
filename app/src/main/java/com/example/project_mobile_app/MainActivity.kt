@@ -2,16 +2,16 @@ package com.example.project_mobile_app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
+import ui.screens.ExperienceDetailScreen
+import ui.screens.MapScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +19,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjectmobileappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                var selectedPlaceIdForDetail by remember { mutableStateOf<String?>(null) }
+
+                if (selectedPlaceIdForDetail != null) {
+                    BackHandler {
+                        selectedPlaceIdForDetail = null
+                    }
+                    ExperienceDetailScreen(
+                        placeId = selectedPlaceIdForDetail!!,
+                        onBackClick = { selectedPlaceIdForDetail = null }
+                    )
+                } else {
+                    MapScreen(
+                        onViewPlaceClick = { placeId ->
+                            selectedPlaceIdForDetail = placeId
+                        }
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ProjectmobileappTheme {
-        Greeting("Android")
     }
 }
