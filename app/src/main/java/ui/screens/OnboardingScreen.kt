@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.project_mobile_app.R
 
 private val Green = Color(0xFF176B50)
-private val DarkText = Color(0xFF25313B)
+private val OnboardingDarkText = Color(0xFF25313B)
 private val GrayText = Color(0xFF6E7890)
 private val Beige = Color(0xFFF6F0E3)
 
@@ -73,7 +73,7 @@ fun OnboardingScreen(
             text = "Discover local gems,\nnear and far.",
             fontSize = 22.sp,
             fontWeight = FontWeight.SemiBold,
-            color = DarkText,
+            color = OnboardingDarkText,
             lineHeight = 29.sp
         )
 
@@ -98,7 +98,7 @@ fun OnboardingScreen(
             text = "A closer look at Saudi Arabia",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkText,
+            color = OnboardingDarkText,
             lineHeight = 30.sp
         )
 
@@ -153,8 +153,6 @@ fun OnboardingScreen(
             description = "Share tips and join memorable trips."
         )
 
-        // Three onboarding dots removed
-
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
@@ -202,7 +200,7 @@ private fun FeatureItem(
                 text = title,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = DarkText
+                color = OnboardingDarkText
             )
 
             Spacer(modifier = Modifier.height(3.dp))
