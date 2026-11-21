@@ -58,6 +58,7 @@ import com.example.project_mobile_app.ui.theme.LocalLensLightGreen
 import com.example.project_mobile_app.ui.theme.LocalLensWhite
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
 
+
 private data class SavedPlaceItem(
     val id: String,
     val title: String,

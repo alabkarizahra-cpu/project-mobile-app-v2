@@ -43,7 +43,11 @@ val MutedText = Color(0xFF6B7278)
 @Composable
 fun MapScreen(
     onViewPlaceClick: (String) -> Unit,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToExplore: () -> Unit = {},
+    onNavigateToCommunity: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var isMapMode by remember { mutableStateOf(true) }
@@ -73,7 +77,13 @@ fun MapScreen(
 
     Scaffold(
         containerColor = ScreenBg,
-        bottomBar = { LocalLensBottomBar(selectedTab = "Map") }
+        bottomBar = { LocalLensBottomBar(
+            selectedTab = "Map",
+            onNavigateToHome = onNavigateToHome,
+            onNavigateToExplore = onNavigateToExplore,
+            onNavigateToCommunity = onNavigateToCommunity,
+            onNavigateToProfile = onNavigateToProfile
+        ) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -534,7 +544,13 @@ fun PlaceListItemCard(
 }
 
 @Composable
-fun LocalLensBottomBar(selectedTab: String) {
+fun LocalLensBottomBar(
+    selectedTab: String,
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToExplore: () -> Unit = {},
+    onNavigateToCommunity: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
+) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 4.dp
@@ -546,11 +562,19 @@ fun LocalLensBottomBar(selectedTab: String) {
             Pair("Community", Icons.Outlined.Groups),
             Pair("Profile", Icons.Outlined.PersonOutline)
         )
+
         items.forEach { (label, icon) ->
             val isSelected = selectedTab == label
             NavigationBarItem(
                 selected = isSelected,
-                onClick = { },
+                onClick = {
+                    when (label) {
+                        "Home" -> onNavigateToHome()
+                        "Explore" -> onNavigateToExplore()
+                        "Community" -> onNavigateToCommunity()
+                        "Profile" -> onNavigateToProfile()
+                    }
+                },
                 icon = {
                     Box(
                         modifier = Modifier
