@@ -62,7 +62,7 @@ import com.example.project_mobile_app.ui.theme.LocalLensGreen
 import com.example.project_mobile_app.ui.theme.LocalLensLightGreen
 import com.example.project_mobile_app.ui.theme.LocalLensWhite
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
-
+import androidx.compose.material.icons.filled.Groups
 private data class HomePlaceItem(
     val id: String,
     val title: String,
@@ -82,6 +82,7 @@ fun HomeScreen(
     onNavigateToSaved: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToBuildMyDay: () -> Unit = {},
+    onNavigateToCommunityTrips: () -> Unit = {},
     onNavigateToExperienceDetails: (String) -> Unit = {}
 ) {
     val categories = listOf("All", "Heritage", "Crafts", "Nature", "Food")
@@ -127,7 +128,7 @@ fun HomeScreen(
                 onHomeClick = onNavigateToHome,
                 onExploreClick = onNavigateToExplore,
                 onMapClick = onNavigateToMap,
-                onSavedClick = onNavigateToSaved,
+                onCommunityClick = onNavigateToCommunityTrips,
                 onProfileClick = onNavigateToProfile
             )
         }
@@ -443,7 +444,7 @@ private fun HomeBottomNavBar(
     onHomeClick: () -> Unit,
     onExploreClick: () -> Unit,
     onMapClick: () -> Unit,
-    onSavedClick: () -> Unit,
+    onCommunityClick: () -> Unit,
     onProfileClick: () -> Unit
 ) {
     val itemColors = NavigationBarItemDefaults.colors(
@@ -478,13 +479,25 @@ private fun HomeBottomNavBar(
             label = { Text("Map", style = MaterialTheme.typography.labelSmall) },
             colors = itemColors
         )
+
         NavigationBarItem(
-            selected = selectedTab == "saved",
-            onClick = onSavedClick,
-            icon = { Icon(Icons.Filled.Bookmark, contentDescription = "Saved") },
-            label = { Text("Saved", style = MaterialTheme.typography.labelSmall) },
+            selected = selectedTab == "community",
+            onClick = onCommunityClick,
+            icon = {
+                Icon(
+                    Icons.Filled.Groups,
+                    contentDescription = "Community"
+                )
+            },
+            label = {
+                Text(
+                    "Community",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             colors = itemColors
         )
+
         NavigationBarItem(
             selected = selectedTab == "profile",
             onClick = onProfileClick,
