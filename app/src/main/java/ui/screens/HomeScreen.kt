@@ -1,5 +1,7 @@
 package ui.screens
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -19,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
@@ -48,9 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.project_mobile_app.R
 import com.example.project_mobile_app.ui.theme.LocalLensBeige
 import com.example.project_mobile_app.ui.theme.LocalLensGray
 import com.example.project_mobile_app.ui.theme.LocalLensGreen
@@ -63,7 +68,9 @@ private data class HomePlaceItem(
     val title: String,
     val category: String,
     val locationLabel: String,
-    val rating: String
+    val rating: String,
+    val durationLabel: String = "",
+    @DrawableRes val imageRes: Int
 )
 
 // Navigation / Route callbacks for HomeScreen (Milestone 3_Stage 2)
@@ -85,24 +92,30 @@ fun HomeScreen(
         id = "qaisariyah",
         title = "Qaisariyah Souq",
         category = "Heritage",
-        locationLabel = "Al-Ahsa • Historic Market",
-        rating = "4.8"
+        locationLabel = "Al Hofuf, Al Ahsa • Heritage • Food",
+        rating = "4.8",
+        durationLabel = "1 hour • 1.2 km",
+        imageRes = R.drawable.qaisariyah_souq
     )
 
     val nearbyPlaces = listOf(
         HomePlaceItem(
-            id = "al_qarah",
-            title = "Al-Qarah Mountain",
-            category = "Nature",
-            locationLabel = "Al-Hofuf • 12 min away",
-            rating = "4.9"
+            id = "ibrahim_palace",
+            title = "Ibrahim Palace",
+            category = "Heritage",
+            locationLabel = "1.8 km away • Heritage",
+            rating = "4.7",
+            durationLabel = "1 hour",
+            imageRes = R.drawable.ibrahim_palace
         ),
         HomePlaceItem(
-            id = "pottery_studio",
-            title = "Traditional Pottery Workshop",
+            id = "palm_weaving",
+            title = "Palm-weaving workshop",
             category = "Crafts",
-            locationLabel = "Al-Ahsa • 8 min away",
-            rating = "4.7"
+            locationLabel = "2.4 km away • Crafts",
+            rating = "4.9",
+            durationLabel = "1 hour",
+            imageRes = R.drawable.palm_weaving
         )
     )
 
@@ -249,12 +262,20 @@ fun HomeScreen(
                                     .fillMaxWidth()
                                     .height(150.dp)
                                     .background(LocalLensBeige)
-                                    .padding(12.dp)
                             ) {
+                                Image(
+                                    painter = painterResource(id = featuredPlace.imageRes),
+                                    contentDescription = featuredPlace.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
                                     color = LocalLensLightGreen,
-                                    modifier = Modifier.align(Alignment.TopStart)
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(12.dp)
                                 ) {
                                     Text(
                                         text = featuredPlace.category,
@@ -264,21 +285,30 @@ fun HomeScreen(
                                     )
                                 }
 
-                                IconButton(
-                                    onClick = {
-                                        bookmarkedIds = if (isSaved) {
-                                            bookmarkedIds - featuredPlace.id
-                                        } else {
-                                            bookmarkedIds + featuredPlace.id
-                                        }
-                                    },
-                                    modifier = Modifier.align(Alignment.TopEnd)
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = LocalLensWhite.copy(alpha = 0.9f),
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(12.dp)
+                                        .size(36.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                                        contentDescription = "Save place",
-                                        tint = LocalLensGreen
-                                    )
+                                    IconButton(
+                                        onClick = {
+                                            bookmarkedIds = if (isSaved) {
+                                                bookmarkedIds - featuredPlace.id
+                                            } else {
+                                                bookmarkedIds + featuredPlace.id
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                            contentDescription = "Save place",
+                                            tint = LocalLensGreen,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
 
@@ -286,26 +316,20 @@ fun HomeScreen(
                                 modifier = Modifier.padding(14.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = featuredPlace.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "★ ${featuredPlace.rating}",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = LocalLensGreen
-                                    )
-                                }
+                                Text(
+                                    text = featuredPlace.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                                 Text(
                                     text = featuredPlace.locationLabel,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = LocalLensGray
+                                )
+                                Text(
+                                    text = "★ ${featuredPlace.rating} • ${featuredPlace.durationLabel}",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = LocalLensGreen
                                 )
                             }
                         }
@@ -313,7 +337,7 @@ fun HomeScreen(
                 }
             }
 
-            // "A little closer" section
+            // "A little closer" section (Figma style with thumbnails)
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
@@ -327,7 +351,7 @@ fun HomeScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = "Map",
+                            text = "View map",
                             style = MaterialTheme.typography.labelLarge,
                             color = LocalLensGreen,
                             modifier = Modifier.clickable { onNavigateToMap() }
@@ -350,24 +374,21 @@ fun HomeScreen(
                                     .padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
+                                Image(
+                                    painter = painterResource(id = place.imageRes),
+                                    contentDescription = place.title,
+                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(64.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(LocalLensBeige),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = place.category.take(1),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = LocalLensGreen
-                                    )
-                                }
+                                        .clip(RoundedCornerShape(12.dp))
+                                )
 
                                 Spacer(modifier = Modifier.width(12.dp))
 
-                                Column(modifier = Modifier.weight(1f)) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                                ) {
                                     Text(
                                         text = place.title,
                                         style = MaterialTheme.typography.titleMedium,
@@ -375,19 +396,41 @@ fun HomeScreen(
                                     )
                                     Text(
                                         text = place.locationLabel,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = LocalLensGray
                                     )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "${place.rating} ★",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = LocalLensGreen
+                                        )
+                                        if (place.durationLabel.isNotEmpty()) {
+                                            Text(
+                                                text = "  •  ${place.durationLabel}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = LocalLensGray
+                                            )
+                                        }
+                                    }
                                 }
 
-                                Text(
-                                    text = "★ ${place.rating}",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = LocalLensGreen
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Open details",
+                                    tint = LocalLensGreen,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
                     }
+
+                    Text(
+                        text = "Curated demo experiences • Explore at your own pace.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalLensGray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
