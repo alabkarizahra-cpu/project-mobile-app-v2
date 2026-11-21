@@ -43,7 +43,8 @@ private val DayBorder = Color(0xFFE5E5DE)
 @Composable
 fun BuildMyDayScreen(
     onBack: () -> Unit = {},
-    onUseCurrentLocation: (() -> Unit)? = null
+    onUseCurrentLocation: (() -> Unit)? = null,
+    onGenerateItinerary: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

@@ -25,8 +25,9 @@ import androidx.compose.material.icons.filled.LocationOn
 @Composable
 fun CommunityDetailsScreen(
     communityId: String,
-    onBackClick: () -> Unit = {}
-) {
+    onBackClick: () -> Unit = {},
+    onTripClick: (String) -> Unit = {}
+)  {
 
     var isJoined by remember(communityId) {
         mutableStateOf(false)
@@ -440,6 +441,9 @@ fun CommunityDetailsScreen(
                 items(communityTrips) { trip ->
 
                     Card(
+                        onClick = {
+                            onTripClick(trip.tripId)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
