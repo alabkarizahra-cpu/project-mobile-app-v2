@@ -95,7 +95,7 @@ fun HomeScreen(
         locationLabel = "Al Hofuf, Al Ahsa • Heritage • Food",
         rating = "4.8",
         durationLabel = "1 hour • 1.2 km",
-        imageRes = R.drawable.qaisariyah_souq
+        imageRes = R.drawable.home_qaisariyah_souq
     )
 
     val nearbyPlaces = listOf(
@@ -106,7 +106,7 @@ fun HomeScreen(
             locationLabel = "1.8 km away • Heritage",
             rating = "4.7",
             durationLabel = "1 hour",
-            imageRes = R.drawable.ibrahim_palace
+            R.drawable.home_ibrahim_palace
         ),
         HomePlaceItem(
             id = "palm_weaving",
