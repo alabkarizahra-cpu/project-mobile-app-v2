@@ -1,5 +1,7 @@
 package ui.screens
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -16,15 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -48,9 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.project_mobile_app.R
 import com.example.project_mobile_app.ui.theme.LocalLensBeige
 import com.example.project_mobile_app.ui.theme.LocalLensGray
 import com.example.project_mobile_app.ui.theme.LocalLensGreen
@@ -58,23 +63,17 @@ import com.example.project_mobile_app.ui.theme.LocalLensLightGreen
 import com.example.project_mobile_app.ui.theme.LocalLensWhite
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
 
-private data class SavedPlaceItem(
+private data class SavedPlaceEntry(
     val id: String,
     val title: String,
-    val category: String,
-    val locationLabel: String,
+    val subtitle: String,
     val rating: String,
-    val isFeatured: Boolean
+    val metaLabel: String,
+    val tag: String,
+    @DrawableRes val imageRes: Int,
+    val isFeaturedCard: Boolean = false
 )
 
-private data class SavedItineraryItem(
-    val id: String,
-    val title: String,
-    val stopsSummary: String,
-    val durationLabel: String
-)
-
-// Navigation / Route callbacks for SavedPlacesScreen (Milestone 3_Stage 2)
 @Composable
 fun SavedPlacesScreen(
     onNavigateToHome: () -> Unit = {},
@@ -83,66 +82,59 @@ fun SavedPlacesScreen(
     onNavigateToSaved: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToBuildMyDay: () -> Unit = {},
-    onNavigateToExperienceDetails: (String) -> Unit = {},
-    onNavigateToItineraryResult: (String) -> Unit = {}
+    onNavigateToExperienceDetails: (String) -> Unit = {}
 ) {
-    val tabs = listOf("Places", "Itineraries")
-    val categories = listOf("All", "Heritage", "Crafts", "Nature", "Food")
+    var selectedSegment by remember { mutableStateOf("Places") }
+    val filters = listOf("All saved", "Al Ahsa weekend", "Heritage")
+    var selectedFilter by remember { mutableStateOf("All saved") }
 
-    var selectedTopTab by remember { mutableStateOf("Places") }
-    var selectedCategory by remember { mutableStateOf("All") }
-
-    var savedPlaces by remember {
-        mutableStateOf(
-            listOf(
-                SavedPlaceItem(
-                    id = "qaisariyah_saved",
-                    title = "Qaisariyah Souq",
-                    category = "Heritage",
-                    locationLabel = "Al-Ahsa • Historic Market",
-                    rating = "4.8",
-                    isFeatured = true
-                ),
-                SavedPlaceItem(
-                    id = "al_qarah_saved",
-                    title = "Al-Qarah Mountain",
-                    category = "Nature",
-                    locationLabel = "Al-Hofuf • Caves & Palm Groves",
-                    rating = "4.9",
-                    isFeatured = false
-                ),
-                SavedPlaceItem(
-                    id = "pottery_saved",
-                    title = "Traditional Pottery Workshop",
-                    category = "Crafts",
-                    locationLabel = "Al-Ahsa • Local Artisans",
-                    rating = "4.7",
-                    isFeatured = false
-                )
+    val allSavedPlaces = remember {
+        listOf(
+            SavedPlaceEntry(
+                id = "qaisariyah",
+                title = "Qaisariyah Souq",
+                subtitle = "Al Hofuf, Al Ahsa • Heritage • Food",
+                rating = "4.8",
+                metaLabel = "1 hour • 1.2 km",
+                tag = "Heritage",
+                imageRes = R.drawable.qaisariyah_souq,
+                isFeaturedCard = true
+            ),
+            SavedPlaceEntry(
+                id = "ibrahim_palace",
+                title = "Ibrahim Palace",
+                subtitle = "Al Ahsa weekend",
+                rating = "4.7",
+                metaLabel = "1 hour",
+                tag = "Al Ahsa weekend",
+                imageRes = R.drawable.ibrahim_palace,
+                isFeaturedCard = false
+            ),
+            SavedPlaceEntry(
+                id = "at_turaif",
+                title = "At-Turaif District",
+                subtitle = "Heritage collection • Diriyah",
+                rating = "4.9",
+                metaLabel = "2 hours",
+                tag = "Heritage",
+                imageRes = R.drawable.at_turaif_district,
+                isFeaturedCard = false
             )
         )
     }
 
-    val savedItineraries = listOf(
-        SavedItineraryItem(
-            id = "ahsa_heritage_day",
-            title = "Al-Ahsa Heritage & Crafts Morning",
-            stopsSummary = "3 stops • Qaisariyah Souq, Bisht Tailor, Local Cafe",
-            durationLabel = "4 hrs"
-        ),
-        SavedItineraryItem(
-            id = "nature_oasis_route",
-            title = "Caves & Oasis Sunset Route",
-            stopsSummary = "2 stops • Al-Qarah Mountain, Palm Oasis Trail",
-            durationLabel = "3 hrs"
-        )
-    )
+    var savedIds by remember { mutableStateOf(allSavedPlaces.map { it.id }.toSet()) }
 
-    val filteredPlaces = savedPlaces.filter { place ->
-        selectedCategory == "All" || place.category == selectedCategory
+    val visiblePlaces = allSavedPlaces.filter { place ->
+        val isStillSaved = place.id in savedIds
+        val matchesFilter = when (selectedFilter) {
+            "All saved" -> true
+            "Al Ahsa weekend" -> place.subtitle.contains("Al Ahsa", ignoreCase = true) || place.tag == "Al Ahsa weekend"
+            "Heritage" -> place.subtitle.contains("Heritage", ignoreCase = true) || place.tag == "Heritage"
+            else -> true
+        }
+        isStillSaved && matchesFilter
     }
-    val featuredPlace = filteredPlaces.firstOrNull { it.isFeatured }
-    val otherPlaces = filteredPlaces.filter { it.id != featuredPlace?.id }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -161,53 +153,56 @@ fun SavedPlacesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Header
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = "Your saved places",
+                        text = "YOUR CURATED LIST",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LocalLensGray
+                    )
+                    Text(
+                        text = "Saved places",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "Keep track of spots and routes you want to visit.",
+                        text = "Keep the places you want to come back to.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = LocalLensGray
                     )
                 }
             }
 
-            // Places / Itineraries segmented toggle
+            // Places / Collections segmented switcher
             item {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(LocalLensBeige)
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        tabs.forEach { tab ->
-                            val isSelected = selectedTopTab == tab
+                    listOf("Places", "Collections").forEach { segment ->
+                        val isSelected = selectedSegment == segment
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { selectedSegment = segment },
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.surface else LocalLensBeige
+                        ) {
                             Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(if (isSelected) LocalLensGreen else MaterialTheme.colorScheme.surface)
-                                    .clickable { selectedTopTab = tab }
-                                    .padding(vertical = 10.dp),
+                                modifier = Modifier.padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = tab,
+                                    text = segment,
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = if (isSelected) LocalLensWhite else MaterialTheme.colorScheme.onSurface
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else LocalLensGray
                                 )
                             }
                         }
@@ -215,53 +210,59 @@ fun SavedPlacesScreen(
                 }
             }
 
-            if (selectedTopTab == "Places") {
-                // Category filters
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        categories.forEach { category ->
-                            val isSelected = selectedCategory == category
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedCategory = category },
-                                label = {
-                                    Text(
-                                        text = category,
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    labelColor = MaterialTheme.colorScheme.onSurface,
-                                    selectedContainerColor = LocalLensGreen,
-                                    selectedLabelColor = LocalLensWhite
+            // Filter chips
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    filters.forEach { filter ->
+                        val isSelected = selectedFilter == filter
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { selectedFilter = filter },
+                            label = {
+                                Text(
+                                    text = filter,
+                                    style = MaterialTheme.typography.labelLarge
                                 )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                labelColor = MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = LocalLensGreen,
+                                selectedLabelColor = LocalLensWhite
                             )
-                        }
+                        )
                     }
                 }
+            }
 
-                // Section title
-                item {
-                    Text(
-                        text = "Explore, plenty of possibilities",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+            // Count subtitle
+            item {
+                val countText = if (visiblePlaces.size == 1) {
+                    "1 place, plenty of possibility"
+                } else {
+                    "${visiblePlaces.size} places, plenty of possibility"
                 }
+                Text(
+                    text = countText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
 
-                // Featured saved card
-                if (featuredPlace != null) {
-                    item {
+            // Saved items
+            visiblePlaces.forEach { place ->
+                item(key = place.id) {
+                    val isBookmarked = place.id in savedIds
+                    if (place.isFeaturedCard) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onNavigateToExperienceDetails(featuredPlace.id) },
+                                .clickable { onNavigateToExperienceDetails(place.id) },
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
@@ -271,34 +272,40 @@ fun SavedPlacesScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(140.dp)
+                                        .height(150.dp)
                                         .background(LocalLensBeige)
-                                        .padding(12.dp)
                                 ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = LocalLensLightGreen,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                    ) {
-                                        Text(
-                                            text = featuredPlace.category,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = LocalLensGreen,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                        )
-                                    }
+                                    Image(
+                                        painter = painterResource(id = place.imageRes),
+                                        contentDescription = place.title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
 
-                                    IconButton(
-                                        onClick = {
-                                            savedPlaces = savedPlaces.filterNot { it.id == featuredPlace.id }
-                                        },
-                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    Surface(
+                                        shape = RoundedCornerShape(50),
+                                        color = LocalLensWhite.copy(alpha = 0.92f),
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(10.dp)
+                                            .size(34.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Bookmark,
-                                            contentDescription = "Remove saved place",
-                                            tint = LocalLensGreen
-                                        )
+                                        IconButton(
+                                            onClick = {
+                                                savedIds = if (isBookmarked) {
+                                                    savedIds - place.id
+                                                } else {
+                                                    savedIds + place.id
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                                contentDescription = "Toggle saved",
+                                                tint = LocalLensGreen,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                     }
                                 }
 
@@ -306,162 +313,94 @@ fun SavedPlacesScreen(
                                     modifier = Modifier.padding(14.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = featuredPlace.title,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = "★ ${featuredPlace.rating}",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = LocalLensGreen
-                                        )
-                                    }
                                     Text(
-                                        text = featuredPlace.locationLabel,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = place.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = place.subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = LocalLensGray
+                                    )
+                                    Text(
+                                        text = "☆ ${place.rating}  •  ${place.metaLabel}",
+                                        style = MaterialTheme.typography.labelLarge,
                                         color = LocalLensGray
                                     )
                                 }
                             }
                         }
-                    }
-                }
-
-                // Remaining saved places list
-                items(otherPlaces, key = { it.id }) { place ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigateToExperienceDetails(place.id) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Row(
+                    } else {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(58.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(LocalLensBeige),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = place.category.take(1),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalLensGreen
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = place.title,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = place.locationLabel,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = LocalLensGray
-                                )
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    savedPlaces = savedPlaces.filterNot { it.id == place.id }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Bookmark,
-                                    contentDescription = "Remove saved place",
-                                    tint = LocalLensGreen
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (filteredPlaces.isEmpty()) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
+                                .clickable { onNavigateToExperienceDetails(place.id) },
                             shape = RoundedCornerShape(14.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             )
                         ) {
-                            Text(
-                                text = "No saved places in this category yet.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = LocalLensGray,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                }
-            } else {
-                // Saved Itineraries tab content
-                items(savedItineraries, key = { it.id }) { itinerary ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigateToItineraryResult(itinerary.id) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = itinerary.title,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                Image(
+                                    painter = painterResource(id = place.imageRes),
+                                    contentDescription = place.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                 )
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = LocalLensLightGreen
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(3.dp)
                                 ) {
                                     Text(
-                                        text = itinerary.durationLabel,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = LocalLensGreen,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        text = place.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = place.subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = LocalLensGray
+                                    )
+                                    Text(
+                                        text = "${place.rating} ★  •  ${place.metaLabel}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = LocalLensGreen
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        savedIds = if (isBookmarked) {
+                                            savedIds - place.id
+                                        } else {
+                                            savedIds + place.id
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                        contentDescription = "Toggle saved",
+                                        tint = LocalLensGreen
                                     )
                                 }
                             }
-                            Text(
-                                text = itinerary.stopsSummary,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = LocalLensGray
-                            )
                         }
                     }
                 }
             }
 
-            // Bottom CTA Card ("Turn inspiration into a day")
+            // Bottom "Turn inspiration into a day." callout card
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -472,26 +411,35 @@ fun SavedPlacesScreen(
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Turn inspiration into a day",
-                            style = MaterialTheme.typography.titleLarge,
+                            text = "Turn inspiration into a day.",
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "Combine your saved spots into a smooth, personalized itinerary.",
+                            text = "Start with your interests, time and location.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = LocalLensGray
                         )
                         Button(
                             onClick = onNavigateToBuildMyDay,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                containerColor = LocalLensGreen,
+                                contentColor = LocalLensWhite
                             )
                         ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Tune,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Build My Day",
                                 style = MaterialTheme.typography.labelLarge
