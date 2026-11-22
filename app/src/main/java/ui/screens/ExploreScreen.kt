@@ -1,8 +1,6 @@
 package ui.screens
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -18,18 +16,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -69,89 +67,109 @@ private data class ExploreExperienceItem(
     val id: String,
     val title: String,
     val category: String,
+    val areaTag: String,
     val subtitle: String,
     val rating: String,
-    val metaLabel: String,
-    @DrawableRes val imageRes: Int,
-    val isFeaturedCard: Boolean = true,
-    val section: String = "heritage"
+    val isFeatured: Boolean,
+    val imageRes: Int
 )
 
+// Navigation / Route callbacks for ExploreScreen (Milestone 3_Stage 2)
 @Composable
 fun ExploreScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
-    onNavigateToSaved: () -> Unit = {},
+    onNavigateToCommunity: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToExperienceDetails: (String) -> Unit = {}
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    val categories = listOf("Heritage", "Food", "Nature", "Arts", "Crafts")
-    var selectedCategory by remember { mutableStateOf("Heritage") }
-    var selectedMode by remember { mutableStateOf("List") }
-    var bookmarkedIds by remember { mutableStateOf(setOf("qaisariyah")) }
+    val categories = listOf("All", "Heritage", "Crafts", "Nature", "Food")
+    val quickFilters = listOf("Near me", "Top rated", "Half-day")
 
-    val experiences = listOf(
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All") }
+    var selectedQuickFilter by remember { mutableStateOf<String?>(null) }
+    var bookmarkedIds by remember { mutableStateOf(setOf("qaisariyah_exp")) }
+
+    val allExperiences = listOf(
         ExploreExperienceItem(
-            id = "qaisariyah",
+            id = "qaisariyah_exp",
             title = "Qaisariyah Souq",
             category = "Heritage",
-            subtitle = "Al Hofuf, Al Ahsa • Heritage • Food",
+            areaTag = "Al-Ahsa",
+            subtitle = "Historic covered market with spices, textiles, and local stories",
             rating = "4.8",
-            metaLabel = "1 hour • 1.2 km",
-            imageRes = R.drawable.qaisariyah_souq,
-            isFeaturedCard = true,
-            section = "heritage"
+            isFeatured = true,
+            imageRes = R.drawable.qaisariyah_souq
         ),
         ExploreExperienceItem(
-            id = "at_turaif",
+            id = "at_turaif_exp",
             title = "At-Turaif District",
             category = "Heritage",
-            subtitle = "Diriyah, Riyadh • Heritage",
+            areaTag = "Diriyah",
+            subtitle = "Mud-brick architecture and UNESCO heritage stories in Diriyah",
             rating = "4.9",
-            metaLabel = "2 hours • 330 km",
-            imageRes = R.drawable.at_turaif_district,
-            isFeaturedCard = true,
-            section = "heritage"
+            isFeatured = true,
+            imageRes = R.drawable.at_turaif_district
         ),
         ExploreExperienceItem(
-            id = "historic_al_balad",
-            title = "Historic Al Balad",
-            category = "Arts",
-            subtitle = "Jeddah • Heritage & Arts",
-            rating = "4.8",
-            metaLabel = "2 hours",
-            imageRes = R.drawable.historic_al_balad,
-            isFeaturedCard = false,
-            section = "heritage"
+            id = "palm_weaving_exp",
+            title = "Palm Weaving Craft",
+            category = "Crafts",
+            areaTag = "Al-Ahsa",
+            subtitle = "Traditional palm frond weaving and local artisan workshops",
+            rating = "4.7",
+            isFeatured = false,
+            imageRes = R.drawable.palm_weaving
         ),
         ExploreExperienceItem(
-            id = "edge_of_the_world",
+            id = "edge_world_exp",
             title = "Edge of the World",
             category = "Nature",
-            subtitle = "Riyadh • Nature • 3 hours",
+            areaTag = "Riyadh",
+            subtitle = "Dramatic desert cliffs and scenic sunset views",
+            rating = "4.9",
+            isFeatured = false,
+            imageRes = R.drawable.edge_of_the_world
+        ),
+        ExploreExperienceItem(
+            id = "al_balad_exp",
+            title = "Historic Al-Balad",
+            category = "Heritage",
+            areaTag = "Jeddah",
+            subtitle = "Coral stone alleys, rawashin balconies, and old souqs",
             rating = "4.8",
-            metaLabel = "3 hours",
-            imageRes = R.drawable.edge_of_the_world,
-            isFeaturedCard = false,
-            section = "more"
+            isFeatured = false,
+            imageRes = R.drawable.historic_al_balad
+        ),
+        ExploreExperienceItem(
+            id = "ibrahim_palace_exp",
+            title = "Ibrahim Palace",
+            category = "Heritage",
+            areaTag = "Al-Hofuf",
+            subtitle = "Landmark historic fort blending Najdi and Islamic styles",
+            rating = "4.7",
+            isFeatured = false,
+            imageRes = R.drawable.ibrahim_palace
         )
     )
 
-    val filteredExperiences = experiences.filter { item ->
+    val filteredExperiences = allExperiences.filter { item ->
+        val matchesCategory = selectedCategory == "All" || item.category == selectedCategory
         val matchesSearch = searchQuery.isBlank() ||
                 item.title.contains(searchQuery, ignoreCase = true) ||
-                item.subtitle.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory.isBlank() ||
-                item.category.equals(selectedCategory, ignoreCase = true) ||
-                item.subtitle.contains(selectedCategory, ignoreCase = true) ||
-                selectedCategory == "Heritage"
-        matchesSearch && matchesCategory
+                item.category.contains(searchQuery, ignoreCase = true) ||
+                item.areaTag.contains(searchQuery, ignoreCase = true)
+        val matchesQuick = when (selectedQuickFilter) {
+            "Top rated" -> (item.rating.toDoubleOrNull() ?: 0.0) >= 4.8
+            else -> true
+        }
+        matchesCategory && matchesSearch && matchesQuick
     }
 
-    val heritageItems = filteredExperiences.filter { it.section == "heritage" }
-    val moreItems = filteredExperiences.filter { it.section == "more" }
+    val featuredItems = filteredExperiences.filter { it.isFeatured }
+    val moreWaysItems = filteredExperiences.filter { !it.isFeatured }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -161,7 +179,7 @@ fun ExploreScreen(
                 onHomeClick = onNavigateToHome,
                 onExploreClick = onNavigateToExplore,
                 onMapClick = onNavigateToMap,
-                onSavedClick = onNavigateToSaved,
+                onCommunityClick = onNavigateToCommunity,
                 onProfileClick = onNavigateToProfile
             )
         }
@@ -171,247 +189,216 @@ fun ExploreScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Header & Search field
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = "DISCOVER SAUDI ARABIA",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LocalLensGray
+                        text = "Explore experiences",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
-                    Row(
+
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Explore experiences",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        IconButton(onClick = onNavigateToSaved) {
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        leadingIcon = {
                             Icon(
-                                imageVector = Icons.Filled.BookmarkBorder,
-                                contentDescription = "Saved places",
-                                tint = LocalLensGreen
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "Search experiences",
+                                tint = LocalLensGray
                             )
-                        }
-                    }
-                }
-            }
-
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    placeholder = {
-                        Text(
-                            text = "Search places, food, experiences",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LocalLensGray
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Search places, crafts, or areas...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = LocalLensGray
+                            )
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedBorderColor = LocalLensGreen,
+                            unfocusedBorderColor = LocalLensBeige
                         )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "Search",
-                            tint = LocalLensGray
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Tune,
-                            contentDescription = "Filter options",
-                            tint = LocalLensGreen
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedBorderColor = LocalLensGreen,
-                        unfocusedBorderColor = LocalLensBeige
                     )
-                )
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    categories.forEach { category ->
-                        val isSelected = selectedCategory == category
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { selectedCategory = category },
-                            label = {
-                                Text(
-                                    text = category,
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                labelColor = MaterialTheme.colorScheme.onSurface,
-                                selectedContainerColor = LocalLensGreen,
-                                selectedLabelColor = LocalLensWhite
-                            )
-                        )
-                    }
                 }
             }
 
+            // Category & secondary filter chips
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LocalLensBeige)
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    listOf("List", "Map").forEach { mode ->
-                        val isSelected = selectedMode == mode
-                        Surface(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable {
-                                    selectedMode = mode
-                                    if (mode == "Map") {
-                                        onNavigateToMap()
-                                    }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        categories.forEach { category ->
+                            val isSelected = selectedCategory == category
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedCategory = category },
+                                label = {
+                                    Text(
+                                        text = category,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
                                 },
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.surface else LocalLensBeige
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = mode,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else LocalLensGray
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    labelColor = MaterialTheme.colorScheme.onSurface,
+                                    selectedContainerColor = LocalLensGreen,
+                                    selectedLabelColor = LocalLensWhite
                                 )
-                            }
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        quickFilters.forEach { filter ->
+                            val isSelected = selectedQuickFilter == filter
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = {
+                                    selectedQuickFilter = if (isSelected) null else filter
+                                },
+                                label = {
+                                    Text(
+                                        text = filter,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = LocalLensLightGreen,
+                                    labelColor = LocalLensGreen,
+                                    selectedContainerColor = LocalLensGreen,
+                                    selectedLabelColor = LocalLensWhite
+                                )
+                            )
                         }
                     }
                 }
             }
 
-            if (heritageItems.isNotEmpty()) {
+            // "Heritage, near and far" section
+            if (featuredItems.isNotEmpty()) {
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Heritage, near and far",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = "Filters",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = LocalLensGreen
-                        )
-                    }
+                    Text(
+                        text = "Heritage, near and far",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
-                heritageItems.forEach { item ->
-                    item(key = item.id) {
-                        val isSaved = item.id in bookmarkedIds
-                        if (item.isFeaturedCard) {
-                            Card(
+                items(featuredItems, key = { it.id }) { experience ->
+                    val isSaved = experience.id in bookmarkedIds
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToExperienceDetails(experience.id) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column {
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onNavigateToExperienceDetails(item.id) },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                )
+                                    .height(145.dp)
                             ) {
-                                Column {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(150.dp)
-                                            .background(LocalLensBeige)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = item.imageRes),
-                                            contentDescription = item.title,
-                                            contentScale = ContentScale.Crop,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
+                                Image(
+                                    painter = painterResource(id = experience.imageRes),
+                                    contentDescription = experience.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
 
-                                        Surface(
-                                            shape = RoundedCornerShape(50),
-                                            color = LocalLensWhite.copy(alpha = 0.92f),
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                                .padding(10.dp)
-                                                .size(34.dp)
-                                        ) {
-                                            IconButton(
-                                                onClick = {
-                                                    bookmarkedIds = if (isSaved) {
-                                                        bookmarkedIds - item.id
-                                                    } else {
-                                                        bookmarkedIds + item.id
-                                                    }
-                                                }
-                                            ) {
-                                                Icon(
-                                                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                                                    contentDescription = "Save experience",
-                                                    tint = LocalLensGreen,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = LocalLensLightGreen,
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(12.dp)
+                                ) {
+                                    Text(
+                                        text = "${experience.category} • ${experience.areaTag}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = LocalLensGreen,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = LocalLensWhite.copy(alpha = 0.9f),
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(8.dp)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            bookmarkedIds = if (isSaved) {
+                                                bookmarkedIds - experience.id
+                                            } else {
+                                                bookmarkedIds + experience.id
                                             }
-                                        }
-                                    }
-
-                                    Column(
-                                        modifier = Modifier.padding(14.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        },
+                                        modifier = Modifier.size(36.dp)
                                     ) {
-                                        Text(
-                                            text = item.title,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = item.subtitle,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = LocalLensGray
-                                        )
-                                        Text(
-                                            text = "☆ ${item.rating}  •  ${item.metaLabel}",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = LocalLensGray
+                                        Icon(
+                                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                            contentDescription = "Save experience",
+                                            tint = LocalLensGreen
                                         )
                                     }
                                 }
                             }
-                        } else {
-                            ExploreCompactCard(
-                                item = item,
-                                onClick = { onNavigateToExperienceDetails(item.id) }
-                            )
+
+                            Column(
+                                modifier = Modifier.padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = experience.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "★ ${experience.rating}",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = LocalLensGreen
+                                    )
+                                }
+                                Text(
+                                    text = experience.subtitle,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = LocalLensGray
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            if (moreItems.isNotEmpty()) {
+            // "More ways to explore" section
+            if (moreWaysItems.isNotEmpty()) {
                 item {
                     Text(
                         text = "More ways to explore",
@@ -420,85 +407,75 @@ fun ExploreScreen(
                     )
                 }
 
-                moreItems.forEach { item ->
-                    item(key = item.id) {
-                        ExploreCompactCard(
-                            item = item,
-                            onClick = { onNavigateToExperienceDetails(item.id) }
+                items(moreWaysItems, key = { it.id }) { experience ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToExperienceDetails(experience.id) },
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(id = experience.imageRes),
+                                contentDescription = experience.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(58.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = experience.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "${experience.areaTag} • ${experience.subtitle}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = LocalLensGray,
+                                    maxLines = 1
+                                )
+                            }
+
+                            Text(
+                                text = "★ ${experience.rating}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = LocalLensGreen
+                            )
+                        }
                     }
                 }
             }
 
-            item {
-                Text(
-                    text = "Ratings and visit lengths are illustrative demo content.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalLensGray
-                )
+            if (filteredExperiences.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Text(
+                            text = "No matching experiences found. Try another filter or keyword.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalLensGray,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun ExploreCompactCard(
-    item: ExploreExperienceItem,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = item.imageRes),
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = item.subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalLensGray
-                )
-                Text(
-                    text = "${item.rating} ★  •  ${item.metaLabel}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = LocalLensGreen
-                )
-            }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Open details",
-                tint = LocalLensGray,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }
@@ -509,8 +486,8 @@ private fun ExploreBottomNavBar(
     onHomeClick: () -> Unit,
     onExploreClick: () -> Unit,
     onMapClick: () -> Unit,
-    onSavedClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onCommunityClick: () -> Unit,
+    onProfileClick: () -> Unit,
 ) {
     val itemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = LocalLensGreen,
@@ -545,10 +522,20 @@ private fun ExploreBottomNavBar(
             colors = itemColors
         )
         NavigationBarItem(
-            selected = selectedTab == "saved",
-            onClick = onSavedClick,
-            icon = { Icon(Icons.Filled.Bookmark, contentDescription = "Saved") },
-            label = { Text("Saved", style = MaterialTheme.typography.labelSmall) },
+            selected = selectedTab == "community",
+            onClick = onCommunityClick,
+            icon = {
+                Icon(
+                    Icons.Filled.Groups,
+                    contentDescription = "Community"
+                )
+            },
+            label = {
+                Text(
+                    "Community",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
             colors = itemColors
         )
         NavigationBarItem(
