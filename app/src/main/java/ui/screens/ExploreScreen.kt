@@ -1,6 +1,6 @@
 package ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
@@ -50,16 +51,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.project_mobile_app.R
 import com.example.project_mobile_app.ui.theme.LocalLensBeige
 import com.example.project_mobile_app.ui.theme.LocalLensGray
 import com.example.project_mobile_app.ui.theme.LocalLensGreen
 import com.example.project_mobile_app.ui.theme.LocalLensLightGreen
 import com.example.project_mobile_app.ui.theme.LocalLensWhite
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
-import androidx.compose.material.icons.filled.Groups
+
 private data class ExploreExperienceItem(
     val id: String,
     val title: String,
@@ -67,7 +70,8 @@ private data class ExploreExperienceItem(
     val areaTag: String,
     val subtitle: String,
     val rating: String,
-    val isFeatured: Boolean
+    val isFeatured: Boolean,
+    val imageRes: Int
 )
 
 // Navigation / Route callbacks for ExploreScreen (Milestone 3_Stage 2)
@@ -76,7 +80,6 @@ fun ExploreScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToExplore: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
-    onNavigateToSaved: () -> Unit = {},
     onNavigateToCommunity: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToExperienceDetails: (String) -> Unit = {}
@@ -97,34 +100,38 @@ fun ExploreScreen(
             areaTag = "Al-Ahsa",
             subtitle = "Historic covered market with spices, textiles, and local stories",
             rating = "4.8",
-            isFeatured = true
+            isFeatured = true,
+            imageRes = R.drawable.qaisariyah_souq
         ),
         ExploreExperienceItem(
-            id = "al_qarah_exp",
-            title = "Al-Qarah Mountain",
+            id = "diriyah_turaif_exp",
+            title = "At-Turaif District",
             category = "Nature",
-            areaTag = "Al-Hofuf",
-            subtitle = "Limestone caves and cool walkways surrounded by palm groves",
+            areaTag = "Diriyah",
+            subtitle = "Mud-brick heritage trails and scenic historic walks",
             rating = "4.9",
-            isFeatured = true
+            isFeatured = true,
+            imageRes = R.drawable.diriyah_turaif
         ),
         ExploreExperienceItem(
-            id = "bisht_weaving_exp",
-            title = "Al-Ahsa Bisht Craft",
+            id = "palm_weaving_exp",
+            title = "Palm Weaving Craft",
             category = "Crafts",
-            areaTag = "Al-Hofuf",
-            subtitle = "Traditional hand-woven bisht tailoring and heritage artisans",
+            areaTag = "Al-Ahsa",
+            subtitle = "Traditional palm frond weaving and heritage artisans",
             rating = "4.7",
-            isFeatured = false
+            isFeatured = false,
+            imageRes = R.drawable.palm_weaving
         ),
         ExploreExperienceItem(
-            id = "oasis_trail_exp",
-            title = "Palm Oasis Walking Trail",
+            id = "journal_mountain_exp",
+            title = "Scenic Mountain Trail",
             category = "Nature",
-            areaTag = "Al-Ahsa",
-            subtitle = "Quiet morning walk through historic irrigation channels",
+            areaTag = "Riyadh",
+            subtitle = "Quiet morning walk along dramatic cliffs and trails",
             rating = "4.6",
-            isFeatured = false
+            isFeatured = false,
+            imageRes = R.drawable.journal_mountain
         )
     )
 
@@ -290,13 +297,20 @@ fun ExploreScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(140.dp)
-                                    .background(LocalLensBeige)
-                                    .padding(12.dp)
                             ) {
+                                Image(
+                                    painter = painterResource(id = experience.imageRes),
+                                    contentDescription = experience.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
                                     color = LocalLensLightGreen,
-                                    modifier = Modifier.align(Alignment.TopStart)
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(12.dp)
                                 ) {
                                     Text(
                                         text = "${experience.category} • ${experience.areaTag}",
@@ -306,21 +320,29 @@ fun ExploreScreen(
                                     )
                                 }
 
-                                IconButton(
-                                    onClick = {
-                                        bookmarkedIds = if (isSaved) {
-                                            bookmarkedIds - experience.id
-                                        } else {
-                                            bookmarkedIds + experience.id
-                                        }
-                                    },
-                                    modifier = Modifier.align(Alignment.TopEnd)
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = LocalLensWhite.copy(alpha = 0.9f),
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(8.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                                        contentDescription = "Save experience",
-                                        tint = LocalLensGreen
-                                    )
+                                    IconButton(
+                                        onClick = {
+                                            bookmarkedIds = if (isSaved) {
+                                                bookmarkedIds - experience.id
+                                            } else {
+                                                bookmarkedIds + experience.id
+                                            }
+                                        },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                            contentDescription = "Save experience",
+                                            tint = LocalLensGreen
+                                        )
+                                    }
                                 }
                             }
 
@@ -381,20 +403,14 @@ fun ExploreScreen(
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
+                            Image(
+                                painter = painterResource(id = experience.imageRes),
+                                contentDescription = experience.title,
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(58.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(LocalLensBeige),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = experience.category.take(1),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalLensGreen
-                                )
-                            }
+                            )
 
                             Spacer(modifier = Modifier.width(12.dp))
 
