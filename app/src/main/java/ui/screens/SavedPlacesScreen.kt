@@ -1,5 +1,6 @@
 package ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -48,16 +49,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.project_mobile_app.ui.theme.LocalLensBeige
+import com.example.project_mobile_app.R
 import com.example.project_mobile_app.ui.theme.LocalLensGray
 import com.example.project_mobile_app.ui.theme.LocalLensGreen
 import com.example.project_mobile_app.ui.theme.LocalLensLightGreen
 import com.example.project_mobile_app.ui.theme.LocalLensWhite
 import com.example.project_mobile_app.ui.theme.ProjectmobileappTheme
-
 
 private data class SavedPlaceItem(
     val id: String,
@@ -65,7 +66,8 @@ private data class SavedPlaceItem(
     val category: String,
     val locationLabel: String,
     val rating: String,
-    val isFeatured: Boolean
+    val isFeatured: Boolean,
+    val imageRes: Int
 )
 
 private data class SavedItineraryItem(
@@ -102,23 +104,26 @@ fun SavedPlacesScreen(
                     category = "Heritage",
                     locationLabel = "Al-Ahsa • Historic Market",
                     rating = "4.8",
-                    isFeatured = true
+                    isFeatured = true,
+                    imageRes = R.drawable.qaisariyah_souq
                 ),
                 SavedPlaceItem(
-                    id = "al_qarah_saved",
-                    title = "Al-Qarah Mountain",
+                    id = "mountain_saved",
+                    title = "Scenic Mountain Trail",
                     category = "Nature",
-                    locationLabel = "Al-Hofuf • Caves & Palm Groves",
+                    locationLabel = "Riyadh • Scenic Cliffs & Trails",
                     rating = "4.9",
-                    isFeatured = false
+                    isFeatured = false,
+                    imageRes = R.drawable.journal_mountain
                 ),
                 SavedPlaceItem(
-                    id = "pottery_saved",
-                    title = "Traditional Pottery Workshop",
+                    id = "palm_weaving_saved",
+                    title = "Palm Weaving Craft",
                     category = "Crafts",
                     locationLabel = "Al-Ahsa • Local Artisans",
                     rating = "4.7",
-                    isFeatured = false
+                    isFeatured = false,
+                    imageRes = R.drawable.palm_weaving
                 )
             )
         )
@@ -128,13 +133,13 @@ fun SavedPlacesScreen(
         SavedItineraryItem(
             id = "ahsa_heritage_day",
             title = "Al-Ahsa Heritage & Crafts Morning",
-            stopsSummary = "3 stops • Qaisariyah Souq, Bisht Tailor, Local Cafe",
+            stopsSummary = "3 stops • Qaisariyah Souq, Ibrahim Palace, Palm Weaving",
             durationLabel = "4 hrs"
         ),
         SavedItineraryItem(
             id = "nature_oasis_route",
-            title = "Caves & Oasis Sunset Route",
-            stopsSummary = "2 stops • Al-Qarah Mountain, Palm Oasis Trail",
+            title = "Cliffs & Historic Trails Route",
+            stopsSummary = "2 stops • Diriyah Turaif, Souq Al Zal",
             durationLabel = "3 hrs"
         )
     )
@@ -272,14 +277,21 @@ fun SavedPlacesScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(140.dp)
-                                        .background(LocalLensBeige)
-                                        .padding(12.dp)
+                                        .height(145.dp)
                                 ) {
+                                    Image(
+                                        painter = painterResource(id = featuredPlace.imageRes),
+                                        contentDescription = featuredPlace.title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+
                                     Surface(
                                         shape = RoundedCornerShape(8.dp),
                                         color = LocalLensLightGreen,
-                                        modifier = Modifier.align(Alignment.TopStart)
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(12.dp)
                                     ) {
                                         Text(
                                             text = featuredPlace.category,
@@ -289,17 +301,25 @@ fun SavedPlacesScreen(
                                         )
                                     }
 
-                                    IconButton(
-                                        onClick = {
-                                            savedPlaces = savedPlaces.filterNot { it.id == featuredPlace.id }
-                                        },
-                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    Surface(
+                                        shape = RoundedCornerShape(50),
+                                        color = LocalLensWhite.copy(alpha = 0.9f),
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(8.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Bookmark,
-                                            contentDescription = "Remove saved place",
-                                            tint = LocalLensGreen
-                                        )
+                                        IconButton(
+                                            onClick = {
+                                                savedPlaces = savedPlaces.filterNot { it.id == featuredPlace.id }
+                                            },
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Bookmark,
+                                                contentDescription = "Remove saved place",
+                                                tint = LocalLensGreen
+                                            )
+                                        }
                                     }
                                 }
 
@@ -351,20 +371,14 @@ fun SavedPlacesScreen(
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
+                            Image(
+                                painter = painterResource(id = place.imageRes),
+                                contentDescription = place.title,
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(58.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(LocalLensBeige),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = place.category.take(1),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalLensGreen
-                                )
-                            }
+                            )
 
                             Spacer(modifier = Modifier.width(12.dp))
 
